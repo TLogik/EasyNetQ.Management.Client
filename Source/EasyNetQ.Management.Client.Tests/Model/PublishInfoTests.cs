@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using EasyNetQ.Management.Client.Model;
 using NUnit.Framework;
+using FluentAssertions;
 
 namespace EasyNetQ.Management.Client.Tests.Model
 {
@@ -15,11 +16,12 @@ namespace EasyNetQ.Management.Client.Tests.Model
         {
         }
 
+
         [Test]
-        [ExpectedException(typeof(ArgumentException), ExpectedMessage = "payloadEncoding must be one of: 'string, base64'")]
         public void Should_throw_when_payload_encoding_is_incorrect()
-        {
-            new PublishInfo(new Dictionary<string, string>(), "routing_key", "payload", "unknown_payload_encoding");
+        {    
+            Action act = () => new PublishInfo(new Dictionary<string, string>(), "routing_key", "payload", "unknown_payload_encoding");
+            act.ShouldThrow<ArgumentException>().Where(e => e.Message.Equals("payloadEncoding must be one of: 'string, base64'"));
         }
     }
 }

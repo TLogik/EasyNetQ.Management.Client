@@ -3,6 +3,7 @@
 using System;
 using EasyNetQ.Management.Client.Model;
 using NUnit.Framework;
+using FluentAssertions;
 
 namespace EasyNetQ.Management.Client.Tests.Model
 {
@@ -33,16 +34,18 @@ namespace EasyNetQ.Management.Client.Tests.Model
             userInfo.Tags.ShouldEqual("administrator,management");
         }
 
-        [Test, ExpectedException(typeof(ArgumentException))]
+        [Test]
         public void Should_not_be_able_to_add_the_same_tag_twice()
         {
-            userInfo.AddTag("management").AddTag("management");
+            Action act = () => userInfo.AddTag("management").AddTag("management");
+            act.ShouldThrow<ArgumentException>();
         }
 
-        [Test, ExpectedException(typeof(ArgumentException))]
+        [Test]
         public void Should_not_be_able_to_add_incorrect_tags()
-        {
-            userInfo.AddTag("blah");
+        { 
+            Action act = () => userInfo.AddTag("blah");
+            act.ShouldThrow<ArgumentException>();
         }
 
         [Test]

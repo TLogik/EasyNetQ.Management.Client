@@ -2,6 +2,8 @@
 
 using EasyNetQ.Management.Client.Model;
 using NUnit.Framework;
+using System;
+using FluentAssertions;
 
 namespace EasyNetQ.Management.Client.Tests.Model
 {
@@ -21,10 +23,12 @@ namespace EasyNetQ.Management.Client.Tests.Model
             exchangeInfo.GetName().ShouldEqual(expectedName);
         }
 
-        [Test, ExpectedException(typeof(EasyNetQManagementException))]
+        [Test]
         public void Should_throw_if_we_try_to_create_an_exchange_with_an_unknown_type()
         {
-            new ExchangeInfo("management_api_test_exchange", "some_bullshit_exchange_type");
+            Action act = () => new ExchangeInfo("management_api_test_exchange", "some_bullshit_exchange_type");
+            act.ShouldThrow<EasyNetQManagementException>();
+
         }
     }
 }

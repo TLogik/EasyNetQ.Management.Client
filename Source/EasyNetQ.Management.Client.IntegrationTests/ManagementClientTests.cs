@@ -6,6 +6,7 @@ using System;
 using System.CodeDom;
 using System.Collections.Generic;
 using System.Linq;
+using FluentAssertions;
 
 namespace EasyNetQ.Management.Client.IntegrationTests
 {
@@ -25,6 +26,7 @@ namespace EasyNetQ.Management.Client.IntegrationTests
         private const string testQueue = "management_api_test_queue";
         private const string testQueueWithPlusChar = "management_api_test_queue+plus+test";
         private const string testUser = "mikey";
+
 
         [SetUp]
         public void SetUp()
@@ -115,11 +117,12 @@ namespace EasyNetQ.Management.Client.IntegrationTests
             managementClient.CloseConnection(connections.First());
         }
 
-        [Test, ExpectedException(typeof(UnexpectedHttpStatusCodeException))]
+        [Test]
         public void Should_throw_when_trying_to_close_unknown_connection()
         {
             var connection = new Connection {Name = "unknown"};
-            managementClient.CloseConnection(connection);
+            Action act = () =>managementClient.CloseConnection(connection);
+            act.ShouldThrow<UnexpectedHttpStatusCodeException>();
         }
 
         [Test]
@@ -351,6 +354,11 @@ namespace EasyNetQ.Management.Client.IntegrationTests
         [Test]
         public void Should_be_able_to_create_a_queue_with_arguments()
         {
+            //If the queue already exists then the test will fail
+            //So we cleanup
+            var oldQueue = managementClient.GetQueues().SingleOrDefault(x => x.Name == testQueue);
+            if (oldQueue != null) managementClient.DeleteQueue(oldQueue);
+            //Proceed with test
             var exchangeName = "test-dead-letter-exchange";
             var argumentKey = "x-dead-letter-exchange";
             var vhost = managementClient.GetVhost(vhostName);
@@ -359,6 +367,9 @@ namespace EasyNetQ.Management.Client.IntegrationTests
             var queue = managementClient.CreateQueue(queueInfo, vhost);
             queue.Arguments[argumentKey].ShouldNotBeNull();
             queue.Arguments[argumentKey].ShouldEqual(exchangeName);
+
+            //cleanup
+            managementClient.DeleteQueue(queue);
         }
 
         [Test]
@@ -971,6 +982,14 @@ namespace EasyNetQ.Management.Client.IntegrationTests
         [Explicit]
         public void Should_be_able_to_create_federation_upstream_policy()
         {
+            //Cleanup
+            var policies = managementClient.GetPolicies().Where(p => p.Pattern.Equals("averyuncommonpattern"));
+            if (policies.Any()){
+                var host = managementClient.GetVhost(vhostName);
+                foreach (var p in policies) managementClient.DeletePolicy(p.Name,host); 
+            }
+
+                
             var policyName = "a-sample-federation-upstream-policy";
             
             managementClient.CreatePolicy(new Policy

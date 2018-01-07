@@ -4,6 +4,8 @@
     using Client.Serialization;
     using Newtonsoft.Json;
     using NUnit.Framework;
+    using FluentAssertions;
+    using System;
 
     [TestFixture(Category = "Unit")]
     class HaParamsConverterTests
@@ -37,10 +39,13 @@
         }
 
         [Test]
-        [ExpectedException(typeof(JsonSerializationException))]
         public void Should_not_be_able_to_deserialize_non_string_list()
         {
-            JsonConvert.DeserializeObject<HaParams>("[1,2]", new HaParamsConverter());
+            Action act = () =>
+            {
+                JsonConvert.DeserializeObject<HaParams>("[1,2]", new HaParamsConverter());
+            };
+            act.ShouldThrow<JsonSerializationException>();
         }
 
         [Test]
@@ -56,17 +61,23 @@
         }
 
         [Test]
-        [ExpectedException(typeof(JsonSerializationException))]
         public void Should_not_be_able_to_serialize_null_nodes_list()
         {
-            JsonConvert.SerializeObject(new HaParams { AssociatedHaMode = HaMode.Nodes }, new HaParamsConverter());
+            Action act = () =>
+            {
+                JsonConvert.SerializeObject(new HaParams { AssociatedHaMode = HaMode.Nodes }, new HaParamsConverter());
+            };
+            act.ShouldThrow<JsonSerializationException>();
         }
 
         [Test]
-        [ExpectedException(typeof(JsonSerializationException))]
         public void Should_not_be_able_to_serialize_all_type()
         {
-            JsonConvert.SerializeObject(new HaParams { AssociatedHaMode = HaMode.All, Nodes = new[] { "a", "b" } }, new HaParamsConverter());
+            Action act = () =>
+            {
+                JsonConvert.SerializeObject(new HaParams { AssociatedHaMode = HaMode.All, Nodes = new[] { "a", "b" } }, new HaParamsConverter());
+            };
+            act.ShouldThrow<JsonSerializationException>();
         }
     }
 }

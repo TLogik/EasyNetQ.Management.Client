@@ -786,6 +786,7 @@ namespace EasyNetQ.Management.Client
         /// <param name="useSsl">   true if using SSL.</param>
         private void LeaveDotsAndSlashesEscaped(bool useSsl)
         {
+           /*
             var getSyntaxMethod =
                 typeof(UriParser).GetMethod("GetSyntax", BindingFlags.Static | BindingFlags.NonPublic);
             if (getSyntaxMethod == null)
@@ -803,6 +804,7 @@ namespace EasyNetQ.Management.Client
             }
 
             setUpdatableFlagsMethod.Invoke(uriParser, new object[] { 0 });
+            */
         }
     }
 }
